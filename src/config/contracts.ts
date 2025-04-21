@@ -1,0 +1,8 @@
+export const DEPLOYED_CONTRACTS = {
+  PACKAGE_ID: import.meta.env.VITE_PACKAGE_ID,
+  CAMPAIGN_REGISTRY_ID: import.meta.env.VITE_CAMPAIGN_REGISTRY_ID,
+  FEATURED_CAMPAIGNS_ID: import.meta.env.VITE_FEATURED_CAMPAIGNS_ID,
+};
+
+export const NETWORK = import.meta.env.VITE_SUI_NETWORK;
+

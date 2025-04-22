@@ -13,6 +13,8 @@ import NotFound from "./pages/NotFound";
 import UserProfile from "./pages/UserProfile";
 import Notifications from "./pages/Notifications";
 import MyCampaigns from "./pages/MyCampaigns";
+import ContributorDashboard from "./pages/ContributorDashboard";
+import InfluencerDashboard from "./pages/InfluencerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/my-campaigns" element={<MyCampaigns />} />
+            <Route path="/contributor" element={<ContributorDashboard />} />
+            <Route path="/influencer" element={<InfluencerDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

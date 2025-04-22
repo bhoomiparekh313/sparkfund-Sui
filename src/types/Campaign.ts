@@ -1,4 +1,3 @@
-
 export interface Campaign {
   id: string;
   title: string;
@@ -15,6 +14,7 @@ export interface Campaign {
   tiers: Tier[];
   approvers: string[];
   approvals: string[];
+  category: CampaignCategory;
 }
 
 export interface Tier {
@@ -65,3 +65,4 @@ export interface CampaignNotification {
 }
 
 export type UserRole = 'creator' | 'contributor' | 'influencer';
+export type CampaignCategory = 'tech' | 'health' | 'education' | 'environment' | 'social' | 'other';

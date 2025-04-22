@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -11,7 +10,6 @@ import { Separator } from "@/components/ui/separator";
 import { useWallet } from "@/contexts/WalletContext";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock data - in a real app this would come from the Sui blockchain
 const dummyCampaigns: Campaign[] = [
   {
     id: "1",
@@ -32,7 +30,8 @@ const dummyCampaigns: Campaign[] = [
       { name: "Premium", amount: 500, description: "All previous rewards plus name on donor wall" }
     ],
     approvers: ["0xabc...", "0xdef..."],
-    approvals: ["0xabc..."]
+    approvals: ["0xabc..."],
+    category: 'environment'
   },
   {
     id: "2",
@@ -53,7 +52,8 @@ const dummyCampaigns: Campaign[] = [
       { name: "Champion", amount: 800, description: "All previous rewards plus certificate" }
     ],
     approvers: ["0xjkl...", "0xmno..."],
-    approvals: []
+    approvals: [],
+    category: 'education'
   },
   {
     id: "3",
@@ -74,7 +74,8 @@ const dummyCampaigns: Campaign[] = [
       { name: "Major Stakeholder", amount: 7500, description: "All previous rewards plus early access" }
     ],
     approvers: ["0xvwx...", "0xyz..."],
-    approvals: ["0xvwx..."]
+    approvals: ["0xvwx..."],
+    category: 'tech'
   },
 ];
 
@@ -88,7 +89,6 @@ export default function CampaignDetails() {
   const { toast } = useToast();
   
   useEffect(() => {
-    // Simulate fetching campaign from blockchain
     const foundCampaign = dummyCampaigns.find(c => c.id === id);
     setCampaign(foundCampaign || null);
   }, [id]);
@@ -139,10 +139,8 @@ export default function CampaignDetails() {
     setIsSubmitting(true);
     
     try {
-      // Here we would interact with the Sui blockchain
       console.log(`Donating ${donationAmount} SUI to campaign ${campaign.id}`);
       
-      // Simulate success and update UI
       setTimeout(() => {
         setCampaign(prev => {
           if (!prev) return null;
@@ -190,7 +188,6 @@ export default function CampaignDetails() {
         </Link>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Campaign Details */}
           <div className="lg:col-span-2 space-y-6">
             <div className="rounded-lg overflow-hidden">
               <img 
@@ -264,7 +261,6 @@ export default function CampaignDetails() {
             </div>
           </div>
           
-          {/* Right Column - Donation Form */}
           <div>
             <Card>
               <CardContent className="p-6">

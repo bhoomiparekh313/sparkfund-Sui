@@ -1,6 +1,6 @@
 import { DEPLOYED_CONTRACTS } from '@/config/contracts';
 import { provider, getObject, getObjects } from './sui-client';
-import type { Campaign, CampaignFormData, CampaignNotification, UserProfile, InfluencerProfile, Tier, UserRole } from '@/types/Campaign';
+import type { Campaign, CampaignFormData, CampaignNotification, UserProfile, InfluencerProfile, Tier, UserRole, CampaignCategory } from '@/types/Campaign';
 
 // Type definitions for blockchain data
 export interface BlockchainCampaign {
@@ -21,6 +21,7 @@ export interface BlockchainCampaign {
   approvers: string[];
   approvals: string[];
   approvalThreshold: number;
+  category?: number; // 0: tech, 1: health, 2: education, 3: environment, 4: social, 5: other
 }
 
 export interface BlockchainTier {
@@ -61,6 +62,30 @@ function convertBlockchainCampaign(bc: BlockchainCampaign): Campaign {
   // Convert campaign type from number to string
   const campaignType = bc.campaignType === 0 ? 'startup' : 'donation';
   
+  // Convert category from number to string with better error handling
+  let category: CampaignCategory = 'other'; // Default to other
+  switch (bc.category) {
+    case 0:
+      category = 'tech';
+      break;
+    case 1:
+      category = 'health';
+      break;
+    case 2:
+      category = 'education';
+      break;
+    case 3:
+      category = 'environment';
+      break;
+    case 4:
+      category = 'social';
+      break;
+    case 5:
+    default:
+      category = 'other';
+      break;
+  }
+  
   return {
     id: bc.id,
     title: bc.title,
@@ -77,37 +102,52 @@ function convertBlockchainCampaign(bc: BlockchainCampaign): Campaign {
     tiers: bc.tiers,
     approvers: bc.approvers,
     approvals: bc.approvals,
+    category,
   };
 }
 
 // Create a campaign using the deployed contract
 export const createCampaign = async (formData: CampaignFormData): Promise<BlockchainResult<string>> => {
   try {
-    console.log(`Creating campaign: ${formData.title} with target ${formData.target}`);
+    console.log(`Creating campaign: ${formData.title} with target ${formData.target} using package ${DEPLOYED_CONTRACTS.PACKAGE_ID}`);
     
     if (!window.suiWallet) {
       throw new Error('Sui wallet not connected');
     }
 
+    // More verbose logging for debugging
+    console.log("Contract Package ID:", DEPLOYED_CONTRACTS.PACKAGE_ID);
+    console.log("Campaign Registry ID:", DEPLOYED_CONTRACTS.CAMPAIGN_REGISTRY_ID);
+    
     const moveCallTx = {
-      target: `${DEPLOYED_CONTRACTS.PACKAGE_ID}::campaign::create_campaign`,
-      arguments: [
-        formData.title,
-        formData.description,
-        formData.image,
-        BigInt(parseFloat(formData.target) * 1e9), // Convert to MIST
-        Math.floor(formData.deadline.getTime() / 1000), // Unix timestamp
-        formData.campaignType === 'startup' ? 0 : 1,
-        formData.tierNames,
-        formData.tierAmounts.map(amount => BigInt(parseFloat(amount) * 1e9)),
-        formData.tierDescriptions,
-      ],
+      kind: 'moveCall',
+      data: {
+        packageObjectId: DEPLOYED_CONTRACTS.PACKAGE_ID,
+        module: 'campaign',
+        function: 'create_campaign',
+        typeArguments: [],
+        arguments: [
+          formData.title,
+          formData.description,
+          formData.image,
+          BigInt(parseFloat(formData.target) * 1e9).toString(), // Convert to MIST
+          Math.floor(formData.deadline.getTime() / 1000).toString(), // Unix timestamp
+          formData.campaignType === 'startup' ? '0' : '1',
+          formData.tierNames,
+          formData.tierAmounts.map(amount => BigInt(parseFloat(amount) * 1e9).toString()),
+          formData.tierDescriptions,
+        ],
+        gasBudget: 10000000,
+      }
     };
+
+    console.log("Preparing transaction:", JSON.stringify(moveCallTx, null, 2));
 
     const result = await window.suiWallet.signAndExecuteTransaction({
       transactionBlock: moveCallTx,
     });
 
+    console.log("Transaction result:", result);
     return {
       success: true,
       data: result.digest
@@ -492,7 +532,8 @@ export const getCampaignDetails = async (
       contributions: [100, 400, 2000],
       approvers: ["0xghi789"],
       approvals: [],
-      approvalThreshold: 1000
+      approvalThreshold: 1000,
+      category: 0 // tech category
     };
     
     return {
@@ -539,7 +580,8 @@ export const getAllCampaigns = async (): Promise<BlockchainResult<Campaign[]>> =
         contributions: [5000, 10000, 10000],
         approvers: ["0xabc123", "0xdef456", "0xghi789"],
         approvals: ["0xabc123", "0xdef456"],
-        approvalThreshold: 5000
+        approvalThreshold: 5000,
+        category: 0 // tech
       },
       {
         id: "campaign-2",
@@ -562,7 +604,8 @@ export const getAllCampaigns = async (): Promise<BlockchainResult<Campaign[]>> =
         contributions: [500, 2000, 3000, 2000],
         approvers: ["0xmno456", "0xpqr789", "0xstu012"],
         approvals: ["0xmno456", "0xpqr789"],
-        approvalThreshold: 200
+        approvalThreshold: 200,
+        category: 2 // education
       }
     ];
     

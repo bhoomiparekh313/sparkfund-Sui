@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Campaign } from '@/types/Campaign';
 import { cn } from '@/lib/utils';
@@ -23,13 +22,18 @@ export function CampaignCard({ campaign, className }: CampaignCardProps) {
   );
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <div className="h-48 overflow-hidden">
+    <Card className={cn("overflow-hidden hover:shadow-lg transition-all duration-300", className)}>
+      <div className="relative h-48 overflow-hidden">
         <img 
-          src={campaign.image} 
+          src={campaign.image || "https://images.unsplash.com/photo-1518770660439-4636190af475"}
           alt={campaign.title}
           className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
         />
+        {campaign.category && (
+          <span className="absolute top-2 right-2 bg-purple-500 text-white px-2 py-1 rounded-full text-xs">
+            {campaign.category}
+          </span>
+        )}
       </div>
       <CardHeader>
         <CardTitle className="line-clamp-1">{campaign.title}</CardTitle>

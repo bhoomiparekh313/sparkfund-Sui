@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { CampaignCard } from "@/components/CampaignCard";
 import { Campaign } from "@/types/Campaign";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { CategoryFilter } from "@/components/CategoryFilter";
 
 // Mock data for initial UI development
 const dummyCampaigns: Campaign[] = [
@@ -28,7 +27,8 @@ const dummyCampaigns: Campaign[] = [
       { name: "Premium", amount: 500, description: "All previous rewards plus name on donor wall" }
     ],
     approvers: ["0xabc...", "0xdef..."],
-    approvals: ["0xabc..."]
+    approvals: ["0xabc..."],
+    category: 'environment'
   },
   {
     id: "2",
@@ -49,7 +49,8 @@ const dummyCampaigns: Campaign[] = [
       { name: "Champion", amount: 800, description: "All previous rewards plus certificate" }
     ],
     approvers: ["0xjkl...", "0xmno..."],
-    approvals: []
+    approvals: [],
+    category: 'education'
   },
   {
     id: "3",
@@ -70,7 +71,8 @@ const dummyCampaigns: Campaign[] = [
       { name: "Major Stakeholder", amount: 7500, description: "All previous rewards plus early access" }
     ],
     approvers: ["0xvwx...", "0xyz..."],
-    approvals: ["0xvwx..."]
+    approvals: ["0xvwx..."],
+    category: 'tech'
   },
   {
     id: "4",
@@ -91,7 +93,8 @@ const dummyCampaigns: Campaign[] = [
       { name: "Champion", amount: 2000, description: "All previous rewards plus recognition" }
     ],
     approvers: ["0x123...", "0x456..."],
-    approvals: ["0x123..."]
+    approvals: ["0x123..."],
+    category: 'health'
   },
   {
     id: "5",
@@ -112,7 +115,8 @@ const dummyCampaigns: Campaign[] = [
       { name: "Hero", amount: 3000, description: "All previous rewards plus certificate" }
     ],
     approvers: ["0xdef...", "0xghi...", "0xjkl..."],
-    approvals: ["0xdef...", "0xghi..."]
+    approvals: ["0xdef...", "0xghi..."],
+    category: 'environment'
   },
   {
     id: "6",
@@ -133,8 +137,97 @@ const dummyCampaigns: Campaign[] = [
       { name: "Benefactor", amount: 2000, description: "All previous rewards plus recognition" }
     ],
     approvers: ["0xmno..."],
-    approvals: []
+    approvals: [],
+    category: 'education'
   },
+  {
+    id: "7",
+    title: "Digital Literacy for Rural Schools",
+    description: "Providing computers and internet access to schools in underserved rural areas.",
+    target: 7500,
+    deadline: new Date(Date.now() + 50 * 24 * 60 * 60 * 1000),
+    amountCollected: 3200,
+    image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=600&q=80",
+    owner: "0xjkl...mno",
+    donators: ["0xpqr...", "0xstu..."],
+    donations: [1500, 1700],
+    campaignType: 'donation',
+    state: 'active',
+    tiers: [
+      { name: "Supporter", amount: 500, description: "Thank you message" },
+      { name: "Sponsor", amount: 1500, description: "School recognition plaque" },
+      { name: "Champion", amount: 3000, description: "On-site visit and recognition" }
+    ],
+    approvers: ["0xjkl...", "0xstu..."],
+    approvals: ["0xjkl..."],
+    category: 'education'
+  },
+  {
+    id: "8",
+    title: "Forest Restoration Project",
+    description: "Replanting native trees and restoring biodiversity in degraded forest areas.",
+    target: 12000,
+    deadline: new Date(Date.now() + 70 * 24 * 60 * 60 * 1000),
+    amountCollected: 6500,
+    image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=600&q=80",
+    owner: "0xvwx...yz",
+    donators: ["0x123...", "0x456...", "0x789..."],
+    donations: [2000, 3000, 1500],
+    campaignType: 'donation',
+    state: 'active',
+    tiers: [
+      { name: "Tree Planter", amount: 100, description: "Digital certificate" },
+      { name: "Forest Guardian", amount: 1000, description: "Named tree plaque" },
+      { name: "Ecosystem Protector", amount: 3000, description: "Annual impact report" }
+    ],
+    approvers: ["0xvwx...", "0x123..."],
+    approvals: ["0xvwx..."],
+    category: 'environment'
+  },
+  {
+    id: "9",
+    title: "Community Kitchen Initiative",
+    description: "Providing nutritious meals and job training for homeless individuals.",
+    target: 9000,
+    deadline: new Date(Date.now() + 40 * 24 * 60 * 60 * 1000),
+    amountCollected: 4800,
+    image: "https://images.unsplash.com/photo-1592861956120-e524ae3c9c18?auto=format&fit=crop&w=600&q=80",
+    owner: "0xabc...def",
+    donators: ["0xghi...", "0xjkl..."],
+    donations: [2500, 2300],
+    campaignType: 'donation',
+    state: 'active',
+    tiers: [
+      { name: "Supporter", amount: 250, description: "Thank you message" },
+      { name: "Meal Sponsor", amount: 1000, description: "Monthly impact report" },
+      { name: "Community Champion", amount: 2500, description: "Special recognition event" }
+    ],
+    approvers: ["0xabc...", "0xghi..."],
+    approvals: [],
+    category: 'social'
+  },
+  {
+    id: "10",
+    title: "Cultural Heritage Preservation",
+    description: "Documenting and preserving traditional crafts and indigenous knowledge.",
+    target: 6500,
+    deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+    amountCollected: 2700,
+    image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?auto=format&fit=crop&w=600&q=80",
+    owner: "0xdef...ghi",
+    donators: ["0xmno..."],
+    donations: [2700],
+    campaignType: 'donation',
+    state: 'active',
+    tiers: [
+      { name: "Supporter", amount: 250, description: "Digital archive access" },
+      { name: "Historian", amount: 1000, description: "Exclusive documentary" },
+      { name: "Patron", amount: 2500, description: "Personal artifact replica" }
+    ],
+    approvers: ["0xdef..."],
+    approvals: [],
+    category: 'other'
+  }
 ];
 
 type SortOption = "newest" | "mostFunded" | "mostBackers" | "endingSoon";

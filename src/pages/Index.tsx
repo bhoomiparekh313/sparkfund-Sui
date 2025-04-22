@@ -9,28 +9,84 @@ import { getUserProfile } from "@/lib/sui";
 import { UserProfile } from "@/types/Campaign";
 import { getAllCampaigns } from "@/lib/sui";
 import { Rocket, Heart, Shield } from "lucide-react";
+import { CategoryFilter } from "@/components/CategoryFilter";
+import type { CampaignCategory } from "@/lib/categories";
 
 export default function Index() {
   const { walletConnected, walletAddress } = useWallet();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [featuredCampaigns, setFeaturedCampaigns] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<CampaignCategory | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       if (walletConnected && walletAddress) {
         try {
-          const profile = await getUserProfile(walletAddress);
-          setUserProfile(profile);
+          const profileResult = await getUserProfile(walletAddress);
+          if (profileResult.success && profileResult.data) {
+            setUserProfile(profileResult.data);
+          }
         } catch (error) {
           console.error("Error fetching user profile:", error);
         }
       }
       
       try {
-        const campaigns = await getAllCampaigns();
-        setFeaturedCampaigns(campaigns.slice(0, 3));
+        const campaignsResult = await getAllCampaigns();
+        if (campaignsResult.success && campaignsResult.data) {
+          const sampleCampaigns = [
+            {
+              ...campaignsResult.data[0],
+              title: "AI-Powered Healthcare Assistant",
+              description: "Revolutionizing patient care with artificial intelligence",
+              image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
+              category: "health",
+              amountCollected: 1500,
+              target: 5000,
+            },
+            {
+              ...campaignsResult.data[0],
+              title: "Sustainable Energy Project",
+              description: "Creating renewable energy solutions for rural communities",
+              image: "https://images.unsplash.com/photo-1518770660439-4636190af475",
+              category: "tech",
+              amountCollected: 2500,
+              target: 8000,
+            },
+            {
+              ...campaignsResult.data[0],
+              title: "Education Technology Platform",
+              description: "Making quality education accessible to everyone",
+              image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
+              category: "education",
+              amountCollected: 3000,
+              target: 10000,
+            },
+            {
+              ...campaignsResult.data[0],
+              title: "Mental Health App",
+              description: "Supporting mental wellness through technology",
+              image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+              category: "health",
+              amountCollected: 2000,
+              target: 6000,
+            },
+            {
+              ...campaignsResult.data[0],
+              title: "Cybersecurity Training Platform",
+              description: "Protecting businesses from cyber threats",
+              image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5",
+              category: "tech",
+              amountCollected: 4000,
+              target: 12000,
+            }
+          ];
+          setFeaturedCampaigns(sampleCampaigns);
+        } else {
+          setFeaturedCampaigns([]);
+        }
       } catch (error) {
         console.error("Error fetching campaigns:", error);
       }
@@ -40,6 +96,10 @@ export default function Index() {
     
     fetchData();
   }, [walletConnected, walletAddress]);
+
+  const filteredCampaigns = selectedCategory
+    ? featuredCampaigns.filter(campaign => campaign.category === selectedCategory)
+    : featuredCampaigns;
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,9 +152,16 @@ export default function Index() {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">Featured Campaigns</h2>
           <Link to="/campaigns">
-            <Button variant="outline" className="border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white">View All</Button>
+            <Button variant="outline" className="border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white">
+              View All
+            </Button>
           </Link>
         </div>
+
+        <CategoryFilter
+          selectedCategory={selectedCategory}
+          onSelectCategory={(category) => setSelectedCategory(category as CampaignCategory)}
+        />
         
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
@@ -104,7 +171,7 @@ export default function Index() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredCampaigns.map((campaign) => (
+            {filteredCampaigns.map((campaign) => (
               <CampaignCard key={campaign.id} campaign={campaign} />
             ))}
           </div>

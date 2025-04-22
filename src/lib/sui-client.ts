@@ -1,4 +1,6 @@
 
+import { NETWORK } from '@/config/contracts';
+
 // Define our own simplified types instead of importing from @mysten/sui.js
 interface Connection {
   fullnode: string;
@@ -14,6 +16,7 @@ class JsonRpcProvider {
   
   async getObject({ id, options }: { id: string, options: { showContent: boolean } }) {
     try {
+      // Simplified implementation for testnet
       const response = await fetch(`${this.connection.fullnode}/objects/${id}?showContent=${options.showContent}`);
       if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
       return await response.json();
@@ -25,6 +28,7 @@ class JsonRpcProvider {
   
   async multiGetObjects({ ids, options }: { ids: string[], options: { showContent: boolean } }) {
     try {
+      // Simplified implementation
       const results = await Promise.all(ids.map(id => this.getObject({ id, options })));
       return results;
     } catch (error) {
@@ -34,34 +38,35 @@ class JsonRpcProvider {
   }
 }
 
-// Get the SUI network from the environment variables
-const suiNetwork = import.meta.env.VITE_SUI_NETWORK || 'testnet';  // Default to 'testnet' if not set
-
-// Define connection details for different networks
-let connection: Connection;
-switch (suiNetwork) {
-  case 'devnet':
-    connection = {
-      fullnode: 'https://fullnode.devnet.sui.io/',  // Devnet fullnode URL
-      faucet: 'https://faucet.devnet.sui.io/gas',   // Devnet faucet URL
-    };
-    break;
-  case 'mainnet':
-    connection = {
-      fullnode: 'https://fullnode.mainnet.sui.io/',  // Mainnet fullnode URL
-      faucet: 'https://faucet.mainnet.sui.io/gas',   // Mainnet faucet URL
-    };
-    break;
-  case 'testnet':
-  default:
-    connection = {
-      fullnode: 'https://fullnode.testnet.sui.io/',  // Testnet fullnode URL
-      faucet: 'https://faucet.testnet.sui.io/gas',   // Testnet faucet URL
-    };
-    break;
+// Initialize the Sui provider based on network configuration
+function getNetworkConnection(network: string): Connection {
+  switch(network) {
+    case 'devnet':
+      return {
+        fullnode: 'https://fullnode.devnet.sui.io/',
+        faucet: 'https://faucet.devnet.sui.io/gas',
+      };
+    case 'testnet':
+      return {
+        fullnode: 'https://fullnode.testnet.sui.io/',
+        faucet: 'https://faucet.testnet.sui.io/gas',
+      };
+    case 'mainnet':
+      return {
+        fullnode: 'https://fullnode.mainnet.sui.io/',
+        faucet: '',
+      };
+    default:
+      return {
+        fullnode: 'https://fullnode.testnet.sui.io/',
+        faucet: 'https://faucet.testnet.sui.io/gas',
+      };
+  }
 }
 
-// Initialize the Sui provider with the selected network
+const connection = getNetworkConnection(NETWORK || 'testnet');
+console.log(`Using Sui ${NETWORK || 'testnet'} network:`, connection.fullnode);
+
 export const provider = new JsonRpcProvider(connection);
 
 // Helper function to get object data

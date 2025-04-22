@@ -11,15 +11,42 @@ export function useSuiWallet() {
     const checkWallet = async () => {
       if (window.suiWallet) {
         setIsInstalled(true);
-        const accounts = await window.suiWallet.getAccounts();
-        if (accounts.length > 0) {
-          setIsConnected(true);
-          setAccount(accounts[0]);
+        try {
+          const accounts = await window.suiWallet.getAccounts();
+          if (accounts && accounts.length > 0) {
+            setIsConnected(true);
+            setAccount(accounts[0]);
+            console.log("Wallet already connected:", accounts[0]);
+          }
+        } catch (err) {
+          console.error("Error checking wallet:", err);
         }
       }
     };
 
     checkWallet();
+    
+    // Add wallet change listener
+    const handleAccountChange = (accounts: string[]) => {
+      console.log("Account changed:", accounts);
+      if (accounts.length > 0) {
+        setIsConnected(true);
+        setAccount(accounts[0]);
+      } else {
+        setIsConnected(false);
+        setAccount(null);
+      }
+    };
+    
+    if (window.suiWallet) {
+      window.suiWallet.on('accountChanged', handleAccountChange);
+    }
+    
+    return () => {
+      if (window.suiWallet) {
+        window.suiWallet.removeListener('accountChanged', handleAccountChange);
+      }
+    };
   }, []);
 
   const connect = useCallback(async () => {
@@ -30,12 +57,30 @@ export function useSuiWallet() {
     }
 
     try {
-      // Use getAccounts instead of requestPermissions if that's what the wallet API provides
+      console.log("Connecting to Sui wallet...");
+      // First try requestPermissions if available
+      try {
+        const accounts = await window.suiWallet.requestPermissions();
+        console.log("Permission requested, accounts:", accounts);
+        if (accounts && accounts.length > 0) {
+          setIsConnected(true);
+          setAccount(accounts[0]);
+          toast.success('Wallet connected successfully');
+          return;
+        }
+      } catch (permissionErr) {
+        console.log("Permission request failed, trying getAccounts:", permissionErr);
+      }
+      
+      // Fallback to getAccounts
       const accounts = await window.suiWallet.getAccounts();
-      if (accounts.length > 0) {
+      console.log("GetAccounts result:", accounts);
+      if (accounts && accounts.length > 0) {
         setIsConnected(true);
         setAccount(accounts[0]);
         toast.success('Wallet connected successfully');
+      } else {
+        toast.error('No accounts found in wallet');
       }
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -57,3 +102,4 @@ export function useSuiWallet() {
     disconnect
   };
 }
+

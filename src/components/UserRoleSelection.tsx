@@ -28,6 +28,8 @@ export function UserRoleSelection() {
 
     setIsRegistering(true);
     try {
+      console.log(`Registering as ${role}...`);
+      
       // Register user with selected role
       await registerUser(
         role,
@@ -35,6 +37,7 @@ export function UserRoleSelection() {
         role === 'influencer' ? "Your bio here" : ""
       );
       
+      console.log(`Successfully registered as ${role}`);
       toast.success(`Registered as ${role}`);
       
       // Redirect based on role
@@ -71,7 +74,7 @@ export function UserRoleSelection() {
             disabled={isRegistering || !walletConnected}
             className="w-full bg-blue-600 hover:bg-blue-700"
           >
-            Register as Creator
+            {isRegistering ? "Registering..." : "Register as Creator"}
           </Button>
         </CardFooter>
       </Card>
@@ -92,7 +95,7 @@ export function UserRoleSelection() {
             disabled={isRegistering || !walletConnected}
             className="w-full bg-green-600 hover:bg-green-700"
           >
-            Register as Contributor
+            {isRegistering ? "Registering..." : "Register as Contributor"}
           </Button>
         </CardFooter>
       </Card>
@@ -113,7 +116,7 @@ export function UserRoleSelection() {
             disabled={isRegistering || !walletConnected}
             className="w-full bg-purple-600 hover:bg-purple-700"
           >
-            Register as Influencer
+            {isRegistering ? "Registering..." : "Register as Influencer"}
           </Button>
         </CardFooter>
       </Card>
